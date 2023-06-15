@@ -1,0 +1,111 @@
+* {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+.full {
+  width: 100%;
+  float: left;
+  height: 100vh;
+  box-sizing: border-box;
+  border-right: 1px solid #ccc;
+}
+
+/* center a div horizontall and vertical */
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.edit {
+  /* fixed at center of screen */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: auto;
+  margin-top: -100px;
+  margin-left: -100px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  background: #fff;
+  padding: 10px;
+  z-index: 1;
+}
+
+.edit h4 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.5rem;
+}
+
+.edit .close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 1.5rem;
+  cursor: pointer;
+  border: solid black 1px;
+  width: 20px;
+  height: 20px;
+  font-size: 14;
+  text-align: center;
+  line-height: 20px;
+  background: red;
+  color: white;
+}
+
+.formBody {
+  margin: auto;
+  width: 80%;
+  box-shadow: 8px 8px 8px rgba(0, 0, 0, 0.2);
+  padding: 20px 10px 20px 10px;
+}
+
+.formBody > div {
+  padding: 5px;
+}
+
+/* Breadcrumb container */
+.breadcrumb-container {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  margin: 20px 0;
+}
+
+/* Breadcrumb item */
+.breadcrumb-item {
+  margin-right: 10px;
+  color: #2d2d2d;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+/* Breadcrumb item hover */
+.breadcrumb-item:hover {
+  color: #0077c2;
+}
+
+/* Last breadcrumb item */
+.breadcrumb-item:last-child {
+  color: #0077c2;
+  font-weight: bold;
+}
+
+/* Separator */
+.breadcrumb-separator {
+  margin: 0 10px;
+  color: #999;
+}
+
+/* Separator icon */
+.breadcrumb-separator::before {
+  content: '\2192'; /* Right arrow symbol */
+}
+
+/* Breadcrumb item active */
+.breadcrumb-item.active {
+  color: #0077c2;
+  font-weight: bold;
+}
