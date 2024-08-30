@@ -113,6 +113,7 @@ class StepperForm extends Component {
           <div>
             {this.state.formData[this.state.currentStep] != undefined ? (
               <>
+                <img src='/public/resource/images/logoVML.png'/>
                 <h2>Matriz de Transferencias</h2>
                 <hr />
                 <h3 class="breadcrumb-container">
