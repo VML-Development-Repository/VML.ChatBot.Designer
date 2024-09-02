@@ -1,24 +1,48 @@
 * {
   font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
-.full {
+
+
+.mainEditorContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  width: 100%;
+}
+.editor {
+  width: 100%;
+}
+.editor-open {
+  width: calc(80% - 10px);
+}
+.edit{
+  width: 20%;
+  border: solid 1px #c4c4f4;
+  padding: 4px;
+}
+
+
+
+
+
+
+/* .full {
   width: 100%;
   float: left;
   height: 100vh;
   box-sizing: border-box;
   border-right: 1px solid #ccc;
-}
+} */
 
 /* center a div horizontall and vertical */
-.center {
+/* .center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-}
+} */
 
-.edit {
-  /* fixed at center of screen */
+/* .edit {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -31,7 +55,7 @@
   background: #fff;
   padding: 10px;
   z-index: 1;
-}
+} */
 
 .edit h4 {
   margin: 0;
@@ -40,9 +64,10 @@
 }
 
 .edit .close {
-  position: absolute;
+  position: relative;
   top: 0;
   right: 0;
+  float: right;
   font-size: 1.5rem;
   cursor: pointer;
   border: solid black 1px;

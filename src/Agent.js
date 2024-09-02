@@ -106,9 +106,9 @@ class StepperForm extends Component {
   render() {
     return (
       <>
-        {/* <p>{JSON.stringify(this.state.selectionHistory)}</p>
-        <p>{JSON.stringify(this.state.selectionHistoryIds)}</p>
-        <p>{JSON.stringify(this.state.currentStep)}</p> */}
+        <p>Selection History: {JSON.stringify(this.state.selectionHistory)}</p>
+        <p>Selection History Ids: {JSON.stringify(this.state.selectionHistoryIds)}</p>
+        <p>Current Step: {JSON.stringify(this.state.currentStep)}</p>
         <Card variant="outlined" className="formBody">
           <div>
             {this.state.formData[this.state.currentStep] != undefined ? (
@@ -165,8 +165,7 @@ class StepperForm extends Component {
                   ) : this.state.formData[this.state.currentStep].transfer ? (
                     <>
                       <p>
-                        Transfiere al siguiente skil, esperamos haberte ayudado
-                        ! 😁 : <br />
+                        -- EN ESTE PUNTO SE FINALIZA EL CHAT --  <br />
                         <b>
                           {this.state.formData[this.state.currentStep].transfer}
                         </b>
