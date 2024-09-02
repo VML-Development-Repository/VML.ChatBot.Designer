@@ -388,116 +388,151 @@ const Admin = () => {
   };
 
   return (
-    <>
-      <div className='mainEditorContainer'>
-        <div className={ editPopUp?"editor-open":"editor"}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            addShape();
-          }}
-        >
-          {' '}
-          Añadir Elemento
-        </Button>{' '}
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            saveTreeToDB();
-          }}
-        >
-          Guardar Arbol
-        </Button>
-        <hr />
-        <Stage
-          ref={stageRef}
-          width={editPopUp?window.innerWidth * 0.77: window.innerWidth}
-          height={window.innerHeight}
-          onWheel={handleWheel}
-          draggable={true}
-          scaleX={scale}
-          scaleY={scale}
-        >
-          <Layer>
-            {shapes != null
-              ? shapes.map((shape, i) => (
-                <DynamicRect
-                  key={shape.key}
-                  shape={shape}
-                  index={i}
-                  onUpdate={(newShape) => updateShape(i, newShape)}
-                  editFields={() => handleClickEdit(shape, i)}
-                  addOption={(newShape) => handleClickAddOption(newShape, i)}
-                  isDrawingLine={isDrawingLine}
-                  optionLineAdd={(selectedOption, type) =>
-                    handleOptionLine(selectedOption, type)
-                  }
-                  editOption={(option, index) =>
-                    handleClickEditOption(option, index)
-                  }
-                  removeOption={(option, index) =>
-                    handleClickRemoveOption(option, index)
-                  }
-                  removeCard={(card, index) =>
-                    handleClickRemoveShape(card, index)
-                  }
-                />
-              ))
-              : null}
-            {lineShapes.map((el, i) => {
-              let points = getLineCoordinates(el)[0];
-              return (
-                <Group key={'lineMarker' + i}>
-                  <Line key={i} points={points} stroke="#000000" />
-                  <Rect
-                    fill="#C0FF00"
-                    width={10}
-                    height={10}
-                    x={points[0] - 5}
-                    y={points[1] - 5}
-                  />
-                  <Rect
-                    fill="#FF0000"
-                    width={10}
-                    height={10}
-                    x={points[2] - 5}
-                    y={points[3] - 5}
-                  />
-                </Group>
-              );
-            })}
-          </Layer>
-          <Layer id="grid-layer" />
-        </Stage>
+    <><div class="DelPopUpContainer">
+      <div class="PopUpHeader m-10">
+        <span class="PopUpTitle">¿Desea continuar?</span>
+        <span class="PopUpClose" onClick={() => { setEditPopUp(false) }}>X</span>
       </div>
-      {editPopUp ? (
-          <div className="edit">
-            
-          <div className="close" onClick={() => closePopUp()}>
-            X
+      <div class="PopUpContent">
+        <p>¿Está seguro que desea eliminar este elemento?</p>
+      </div>
+      <div class="PopUpFooter p-10">
+        <div class="PopUpFooterButtons">
+          <div class="PopUpButtonCancel me-10">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                setEditPopUp(false);
+              }}
+            >
+              Cancelar
+            </Button>
           </div>
-          <h4> Editando</h4>
-          <hr />
-          <div>
-            <label htmlFor="title">Título</label>
-            <br />
-            <textarea
-              type="text"
-              name="title"
-              id="title"
-              value={editingShape.title}
-              onChange={(event) =>
-                setEditingShape({ ...editingShape, title: event.target.value })
-              }
-            />
-            <hr />
-            <button onClick={() => saveShapeInformation()}>Guardar</button>
+          <div class="PopUpButtonDelete ms-10">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                setEditPopUp(false);
+              }}
+            >
+              Eliminar
+            </Button>
           </div>
         </div>
-      ) : null}
+      </div>
     </div>
+      <div className='mainEditorContainer'>
+        <div className={editPopUp ? "editor-open" : "editor"}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              addShape();
+            }}
+          >
+            {' '}
+            Añadir Elemento
+          </Button>{' '}
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              saveTreeToDB();
+            }}
+          >
+            Guardar Arbol
+          </Button>
+
+          <hr />
+          <Stage
+            ref={stageRef}
+            width={editPopUp ? window.innerWidth * 0.77 : window.innerWidth}
+            height={window.innerHeight}
+            onWheel={handleWheel}
+            draggable={true}
+            scaleX={scale}
+            scaleY={scale}
+          >
+            <Layer>
+              {shapes != null
+                ? shapes.map((shape, i) => (
+                  <DynamicRect
+                    key={shape.key}
+                    shape={shape}
+                    index={i}
+                    onUpdate={(newShape) => updateShape(i, newShape)}
+                    editFields={() => handleClickEdit(shape, i)}
+                    addOption={(newShape) => handleClickAddOption(newShape, i)}
+                    isDrawingLine={isDrawingLine}
+                    optionLineAdd={(selectedOption, type) =>
+                      handleOptionLine(selectedOption, type)
+                    }
+                    editOption={(option, index) =>
+                      handleClickEditOption(option, index)
+                    }
+                    removeOption={(option, index) =>
+                      handleClickRemoveOption(option, index)
+                    }
+                    removeCard={(card, index) =>
+                      handleClickRemoveShape(card, index)
+                    }
+                  />
+                ))
+                : null}
+              {lineShapes.map((el, i) => {
+                let points = getLineCoordinates(el)[0];
+                return (
+                  <Group key={'lineMarker' + i}>
+                    <Line key={i} points={points} stroke="#000000" />
+                    <Rect
+                      fill="#C0FF00"
+                      width={10}
+                      height={10}
+                      x={points[0] - 5}
+                      y={points[1] - 5}
+                    />
+                    <Rect
+                      fill="#FF0000"
+                      width={10}
+                      height={10}
+                      x={points[2] - 5}
+                      y={points[3] - 5}
+                    />
+                  </Group>
+                );
+              })}
+            </Layer>
+            <Layer id="grid-layer" />
+          </Stage>
+        </div>
+        {editPopUp ? (
+          <div className="edit">
+
+            <div className="close" onClick={() => closePopUp()}>
+              X
+            </div>
+            <h4> Editando</h4>
+            <hr />
+            <div>
+              <label htmlFor="title">Título</label>
+              <br />
+              <textarea
+                type="text"
+                name="title"
+                id="title"
+                value={editingShape.title}
+                onChange={(event) =>
+                  setEditingShape({ ...editingShape, title: event.target.value })
+                }
+              />
+              <hr />
+              <button onClick={() => saveShapeInformation()}>Guardar</button>
+            </div>
+          </div>
+        ) : null}
+      </div>
 
       {/* PopUp Edit Option */}
       {editPopUpOption ? (
