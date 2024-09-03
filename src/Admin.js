@@ -449,7 +449,7 @@ const Admin = () => {
           <Stage
             ref={stageRef}
             width={editPopUp ? window.innerWidth * 0.77 : window.innerWidth}
-            height={window.innerHeight}
+            height={window.innerHeight - 150}
             onWheel={handleWheel}
             draggable={true}
             scaleX={scale}
