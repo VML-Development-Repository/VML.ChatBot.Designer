@@ -1,7 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
+import axios from 'axios';
 import { Stage, Layer, Rect, Line, Text, Group, Shape } from 'react-konva';
 import { DynamicRect } from './DynamicRect';
 import Button from '@mui/material/Button';
+import { APIURL } from './Config';
 
 const Admin = () => {
   const generateRandomId = () => {
@@ -74,9 +76,36 @@ const Admin = () => {
     return result;
   };
 
-  const saveTreeToDB = () => {
-    localStorage.setItem('flowchart', JSON.stringify(shapes));
-    localStorage.setItem('flowchartLines', JSON.stringify(lineShapes));
+  const saveTreeToDB = async () => {
+    const flowchart = JSON.stringify(shapes);
+    const flowchartLines = JSON.stringify(lineShapes);
+
+    try {
+      // Save flowchart data
+      const flowchartResponse = await axios.post(`${APIURL}/api/flowcharts/flowcharts`, {
+        name: 'latest', // Assuming you want to send a name with the flowchart
+        flowchart: shapes,        // Adjust according to your backend schema
+        verified: false
+      });
+
+      // Save flowchart lines data
+      const flowchartLinesResponse = await axios.post(`${APIURL}/api/flowcharts/flowchartLines`, {
+        name: 'latest', // Replace with actual start node
+        flowchartLines: flowchartLines,   // Replace with actual end node
+        verified: false
+      });
+
+      // Optionally store the response or notify the user
+      console.log('Flowchart saved:', flowchartResponse.data);
+      console.log('Flowchart Lines saved:', flowchartLinesResponse.data);
+
+      // Alternatively, save to localStorage as a fallback
+      localStorage.setItem('flowchart', flowchart);
+      localStorage.setItem('flowchartLines', flowchartLines);
+    } catch (error) {
+      console.error('Error saving data:', error);
+      // You may want to notify the user about the error
+    }
   };
 
   const addShape = () => {
@@ -138,22 +167,22 @@ const Admin = () => {
   const flowchart =
     shapes != null
       ? shapes.reduce((acc, shape, i) => {
-          acc[`element${i + 1}`] = {
-            title: shape.title,
-            options: {},
-          };
-          return acc;
-        }, {})
+        acc[`element${i + 1}`] = {
+          title: shape.title,
+          options: {},
+        };
+        return acc;
+      }, {})
       : null;
 
   const optionsList =
     shapes != null
       ? shapes.reduce((acc, item) => {
-          if (item.options) {
-            acc.push(...item.options);
-          }
-          return acc;
-        }, [])
+        if (item.options) {
+          acc.push(...item.options);
+        }
+        return acc;
+      }, [])
       : null;
 
   const updateShape = (index, newShape) => {
@@ -186,6 +215,8 @@ const Admin = () => {
     newShapes[editingShape.index] = editingShape;
     setShapes(newShapes);
     closePopUp();
+
+    saveTreeToDB()
   };
   const saveOptionInformation = () => {
     let newShapes = [...shapes];
@@ -263,7 +294,7 @@ const Admin = () => {
       x:
         startX +
         ((signX * nodeWidth) / 2) *
-          (absDeltaX > nodeWidth ? 1 : absDeltaX / nodeWidth),
+        (absDeltaX > nodeWidth ? 1 : absDeltaX / nodeWidth),
       y: startY,
     };
 
@@ -271,7 +302,7 @@ const Admin = () => {
       x:
         endX -
         ((signX * nodeWidth) / 2) *
-          (absDeltaX > nodeWidth ? 1 : absDeltaX / nodeWidth),
+        (absDeltaX > nodeWidth ? 1 : absDeltaX / nodeWidth),
       y: endY - (endY > startY ? nodeHeight / 2 : -nodeHeight / 2), // shift control point vertically based on the relative positions of the nodes
     };
     let coords = [startX, startY + 5, endX + 150, endY];
@@ -358,7 +389,8 @@ const Admin = () => {
 
   return (
     <>
-      <div className="full">
+      <div className='mainEditorContainer'>
+        <div className={ editPopUp?"editor-open":"editor"}>
         <Button
           variant="contained"
           color="primary"
@@ -381,7 +413,7 @@ const Admin = () => {
         <hr />
         <Stage
           ref={stageRef}
-          width={window.innerWidth}
+          width={editPopUp?window.innerWidth * 0.77: window.innerWidth}
           height={window.innerHeight}
           onWheel={handleWheel}
           draggable={true}
@@ -391,90 +423,29 @@ const Admin = () => {
           <Layer>
             {shapes != null
               ? shapes.map((shape, i) => (
-                  <DynamicRect
-                    key={shape.key}
-                    shape={shape}
-                    index={i}
-                    onUpdate={(newShape) => updateShape(i, newShape)}
-                    editFields={() => handleClickEdit(shape, i)}
-                    addOption={(newShape) => handleClickAddOption(newShape, i)}
-                    isDrawingLine={isDrawingLine}
-                    optionLineAdd={(selectedOption, type) =>
-                      handleOptionLine(selectedOption, type)
-                    }
-                    editOption={(option, index) =>
-                      handleClickEditOption(option, index)
-                    }
-                    removeOption={(option, index) =>
-                      handleClickRemoveOption(option, index)
-                    }
-                    removeCard={(card, index) =>
-                      handleClickRemoveShape(card, index)
-                    }
-                  />
-                ))
+                <DynamicRect
+                  key={shape.key}
+                  shape={shape}
+                  index={i}
+                  onUpdate={(newShape) => updateShape(i, newShape)}
+                  editFields={() => handleClickEdit(shape, i)}
+                  addOption={(newShape) => handleClickAddOption(newShape, i)}
+                  isDrawingLine={isDrawingLine}
+                  optionLineAdd={(selectedOption, type) =>
+                    handleOptionLine(selectedOption, type)
+                  }
+                  editOption={(option, index) =>
+                    handleClickEditOption(option, index)
+                  }
+                  removeOption={(option, index) =>
+                    handleClickRemoveOption(option, index)
+                  }
+                  removeCard={(card, index) =>
+                    handleClickRemoveShape(card, index)
+                  }
+                />
+              ))
               : null}
-
-            {/* {lineShapes.map((el, i) => {
-              const lineCoords = getLineCoordinates(el);
-              let points = lineCoords[0];
-              let controlPoints = lineCoords[1];
-              console.clear();
-              console.log(points);
-              console.log(controlPoints[0]);
-              console.log(controlPoints[1]);
-              return (
-                <Group key={'lineMarker' + i}>
-                  <Shape
-                    sceneFunc={(context, shape) => {
-                      context.beginPath();
-                      context.moveTo(points[0], points[1]);
-                      context.bezierCurveTo(
-                        controlPoints[0].x,
-                        controlPoints[0].y,
-                        controlPoints[1].x,
-                        controlPoints[1].y,
-                        points[2],
-                        points[3]
-                      );
-                      context.strokeShape(shape);
-                    }}
-                    stroke="#000000"
-                  />
-                  <Rect
-                    fill="#C0FF00"
-                    width={10}
-                    height={10}
-                    x={points[0] - 5}
-                    y={points[1] - 5}
-                  />
-                  <Rect
-                    fill="#FF0000"
-                    width={10}
-                    height={10}
-                    x={points[2] - 5}
-                    y={points[3] - 5}
-                  />
-
-                  <Rect
-                    fill="#00c4ff"
-                    width={15}
-                    height={10}
-                    x={controlPoints[0].x}
-                    y={controlPoints[0].y}
-                  />
-
-                  <Rect
-                    fill="#0010ff"
-                    width={10}
-                    height={15}
-                    x={controlPoints[1].x}
-                    y={controlPoints[1].y}
-                  />
-                </Group>
-              );
-            })} */}
-
             {lineShapes.map((el, i) => {
               let points = getLineCoordinates(el)[0];
               return (
@@ -502,13 +473,17 @@ const Admin = () => {
         </Stage>
       </div>
       {editPopUp ? (
-        <div className="edit">
+          <div className="edit">
+            
+          <div className="close" onClick={() => closePopUp()}>
+            X
+          </div>
           <h4> Editando</h4>
           <hr />
           <div>
             <label htmlFor="title">Título</label>
             <br />
-            <input
+            <textarea
               type="text"
               name="title"
               id="title"
@@ -520,11 +495,9 @@ const Admin = () => {
             <hr />
             <button onClick={() => saveShapeInformation()}>Guardar</button>
           </div>
-          <div className="close" onClick={() => closePopUp()}>
-            X
-          </div>
         </div>
       ) : null}
+    </div>
 
       {/* PopUp Edit Option */}
       {editPopUpOption ? (
