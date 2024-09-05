@@ -413,7 +413,7 @@ const Admin = () => {
         <hr />
         <Stage
           ref={stageRef}
-          width={editPopUp?window.innerWidth * 0.77: window.innerWidth}
+          width={editPopUp||editPopUpOption?window.innerWidth * 0.77: window.innerWidth}
           height={window.innerHeight}
           onWheel={handleWheel}
           draggable={true}
@@ -497,11 +497,15 @@ const Admin = () => {
           </div>
         </div>
       ) : null}
-    </div>
 
       {/* PopUp Edit Option */}
       {editPopUpOption ? (
         <div className="edit">
+
+          <div className="close" onClick={() => closePopUpOption()}>
+            X
+          </div>
+
           <h4> Editando Opcion</h4>
           <hr />
           <div>
@@ -519,11 +523,13 @@ const Admin = () => {
             <hr />
             <button onClick={() => saveOptionInformation()}>Guardar</button>
           </div>
-          <div className="close" onClick={() => closePopUpOption()}>
-            X
-          </div>
+          
         </div>
       ) : null}
+
+    </div>
+
+      
     </>
   );
 };
