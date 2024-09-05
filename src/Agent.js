@@ -106,9 +106,11 @@ class StepperForm extends Component {
   render() {
     return (
       <>
+        {/*
         <p>Selection History: {JSON.stringify(this.state.selectionHistory)}</p>
         <p>Selection History Ids: {JSON.stringify(this.state.selectionHistoryIds)}</p>
         <p>Current Step: {JSON.stringify(this.state.currentStep)}</p>
+        */}
         <Card variant="outlined" className="formBody">
           <div>
             {this.state.formData[this.state.currentStep] != undefined ? (
