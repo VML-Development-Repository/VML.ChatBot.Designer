@@ -143,13 +143,16 @@ class StepperForm extends Component {
                     })}
                   </span>
                 </h3>
-                <h1>{this.state.formData[this.state.currentStep].title}</h1>
+                <h1>{this.state.formData[this.state.currentStep].title.split('\n').map(el => {
+                  return <p>{el}</p>;
+                })}</h1>
                 <div>
                   {this.state.formData[this.state.currentStep].options ? (
                     <div>
                       {Object.entries(
                         this.state.formData[this.state.currentStep].options
                       ).map(([key, value]) => (
+                        // Enviar mensaje de rocket chat
                         <div key={key}>
                           <input
                             type="radio"
