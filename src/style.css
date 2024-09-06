@@ -104,8 +104,8 @@
 }
 
 .chatWindow {
-  max-height: 80vh;
-  min-height: 80vh;
+  max-height: calc(100vh - 180px);
+  min-height: calc(100vh - 180px);
   overflow-y: auto;
   padding: 10px;
   margin-bottom: 20px;
