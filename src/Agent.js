@@ -1,199 +1,269 @@
-import React, { Component } from 'react';
-import Box from '@mui/material/Box';
+import React, { useState, useEffect, useRef } from 'react';
 import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import './style.css';
 
-class StepperForm extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      formData: {},
-      currentStep: '4ovpsx23fphykh', //'null',
-      selectionHistory: ['Inicio', 'Activo', 'Nube', 'Estado de cuenta'], //[],
-      selectionHistoryIds: [
-        'cpr3oi5mjqzgar',
-        'n7yc7kdj95rlgu',
-        'catp1rt2f5a9ql',
-        '4ovpsx23fphykh',
-      ], //[],
-      loading: true,
-    };
-  }
+const StepperForm = () => {
+  const [formData, setFormData] = useState({});
+  const [currentStep, setCurrentStep] = useState('4ovpsx23fphykh');
+  const [selectionHistoryIds, setSelectionHistoryIds] = useState([
+    'cpr3oi5mjqzgar',
+    'n7yc7kdj95rlgu',
+    'catp1rt2f5a9ql',
+    '4ovpsx23fphykh',
+  ]);
+  const [loading, setLoading] = useState(true);
+  const [messages, setMessages] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+  const [optionNumbers, setOptionNumbers] = useState([]);
+  const optionNumbersBase = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "9️⃣"];
+  const chatEndRef = useRef(null);
 
-  componentDidMount() {
+  const generateEmojiNumbers = () => {
+    const numbers = [];
+    for (let i = 1; i <= 50; i++) {
+      let numberStr = i.toString();
+      let emojiNumber = "";
+      for (let char of numberStr) {
+        emojiNumber += optionNumbersBase[parseInt(char)];
+      }
+      numbers.push(emojiNumber);
+    }
+    setOptionNumbers(numbers);
+  };
+
+  useEffect(() => {
+    generateEmojiNumbers();
+
+  }, []);
+  useEffect(() => {
     const storedData = localStorage.getItem('flowchart');
     if (storedData) {
-      let JSONData = this.parseShapesToFlow(JSON.parse(storedData));
-      this.setState({
-        formData: JSONData,
-        currentStep: Object.keys(JSONData)[0],
-        selectionHistory: ['Inicio'],
-        selectionHistoryIds: [Object.keys(JSONData)[0]],
+      const JSONData = parseShapesToFlow(JSON.parse(storedData));
+      setFormData(JSONData);
+      const firstStep = Object.keys(JSONData)[0];
+      setCurrentStep(firstStep);
+
+      const initialMessages = []
+
+      initialMessages.push({
+        agentMessage: {
+          timestamp: new Date().toISOString(),
+          text: JSONData[firstStep].title,
+        },
       });
+
+      initialMessages.push({
+        agentMessage: {
+          timestamp: new Date().toISOString(),
+          text: Object.keys(JSONData[firstStep].options)
+            .map((optionKey, index) => {
+              const optionData = JSONData[firstStep].options[optionKey];
+              return `${optionNumbers[index]} - ${optionData.label}`;
+            })
+            .join("<br/>"),
+        },
+      });
+
+      setMessages(initialMessages);
     }
+    setLoading(false);
+  }, [optionNumbers]);
 
-    this.setState({ loading: false });
-  }
-
-  parseShapesToFlow = (json) => {
-    console.log(json);
+  const parseShapesToFlow = (json) => {
     const result = {};
-
-    for (let i = 0; i < json.length; i++) {
-      const node = json[i];
-
+    json.forEach((node) => {
       if (node.options.length > 0) {
         const options = {};
-        for (const option of node.options) {
-          options[option.target] = option.name;
-        }
+        node.options.forEach((option) => {
+          options[option.key] = {
+            label: option.name,
+            value: option.target,
+          };
+        });
         result[node.key] = {
           title: node.title,
-          options: options,
+          options,
         };
       } else {
         result[node.key] = {
-          transfer: node.title,
+          title: node.title,
         };
       }
-    }
-
+    });
     return result;
   };
 
-  handleOptionChange = (event) => {
-    this.state.formData[this.state.currentStep].transfer;
-    console.log(event.target.value);
-    console.log(this.state.formData[event.target.value]);
-    this.setState({ currentStep: event.target.value });
+  const handleOptionChange = (selectedOption, selectedText) => {
+    console.log(formData[selectedOption])
 
-    let selecedOPtionForBreadcrumb =
-      this.state.formData[this.state.currentStep].options[event.target.value];
-    this.setState((prevState) => ({
-      ...prevState,
-      selectionHistory: [
-        ...prevState.selectionHistory,
-        selecedOPtionForBreadcrumb,
-      ],
-      selectionHistoryIds: [
-        ...prevState.selectionHistoryIds,
-        event.target.value,
-      ],
-    }));
+    const agentMessages = [];
+
+    if (formData[selectedOption] === undefined) {
+      agentMessages.push({
+        systemMessage: {
+          timestamp: new Date().toISOString(),
+          text: "🤖 Nuestro bot se ha perdido, por favor revisa la configuración",
+        },
+      });
+      agentMessages.push({
+        systemMessage: {
+          timestamp: new Date().toISOString(),
+          text: "------------------ CHAT FINALIZADO ------------------",
+        },
+      });
+    } else {
+      formData[selectedOption].title.split("\n").forEach((el) => {
+        if (el !== "") {
+          agentMessages.push({
+            agentMessage: {
+              timestamp: new Date().toISOString(),
+              text: el,
+            },
+          });
+        }
+      });
+
+      if (formData[selectedOption].options) {
+        agentMessages.push({
+          agentMessage: {
+            timestamp: new Date().toISOString(),
+            text: Object.keys(formData[selectedOption].options)
+              .map((optionKey, index) => {
+                const optionData = formData[selectedOption].options[optionKey];
+                return `${optionNumbers[index]} - ${optionData.label}`;
+              })
+              .join("<br/>"),
+          },
+        });
+      } else {
+        agentMessages.push({
+          agentMessage: {
+            timestamp: new Date().toISOString(),
+            text: formData[selectedOption].title,
+          },
+        });
+        agentMessages.push({
+          systemMessage: {
+            timestamp: new Date().toISOString(),
+            text: "------------------ CHAT FINALIZADO ------------------",
+          },
+        });
+      }
+
+    }
+
+    setMessages((prev) => [...prev, ...agentMessages]);
+    setCurrentStep(selectedOption);
+    setSelectionHistoryIds((prev) => [...prev, selectedOption]);
   };
-  reset() {
-    let firstStep = Object.keys(this.state.formData)[0];
-    this.setState({ currentStep: firstStep });
-    this.setState((prevState) => ({
-      ...prevState,
-      selectionHistory: [],
-    }));
-  }
 
-  navigateTo(index) {
-    console.log(index);
-    this.setState({
-      selectionHistory: this.state.selectionHistory.slice(0, index + 1),
-      selectionHistoryIds: this.state.selectionHistoryIds.slice(0, index + 1),
-      currentStep: this.state.selectionHistoryIds[index],
-    });
-  }
+  const handleSubmit = () => {
+    const inputAsNumber = parseInt(inputValue, 10);
+    const optionsArray = Object.keys(formData[currentStep]?.options || {});
+    const userMessage = {
+      userMessage: {
+        timestamp: new Date().toISOString(),
+        text: inputValue,
+      },
+    };
+    setMessages((prev) => [...prev, userMessage]);
 
-  render() {
-    return (
-      <>
-        {/*
-        <p>Selection History: {JSON.stringify(this.state.selectionHistory)}</p>
-        <p>Selection History Ids: {JSON.stringify(this.state.selectionHistoryIds)}</p>
-        <p>Current Step: {JSON.stringify(this.state.currentStep)}</p>
-        */}
-        <Card variant="outlined" className="formBody">
-          <div>
-            {this.state.formData[this.state.currentStep] != undefined ? (
-              <>
-                <h2>Matriz de Transferencias</h2>
-                <hr />
-                <h3 class="breadcrumb-container">
-                  <span class="breadcrumb-item">
-                    {this.state.selectionHistory.map((item, index) => {
-                      const isLastItem =
-                        index === this.state.selectionHistory.length - 1;
-                      return (
-                        <React.Fragment key={item}>
-                          {isLastItem ? (
-                            <span className="breadcrumb-item active">
-                              {item}
-                            </span>
-                          ) : (
-                            <React.Fragment>
-                              <a
-                                className="breadcrumb-item"
-                                href="#"
-                                onClick={() => this.navigateTo(index)}
-                              >
-                                {item}
-                              </a>
-                              <span className="breadcrumb-separator"></span>
-                            </React.Fragment>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                  </span>
-                </h3>
-                <h1>{this.state.formData[this.state.currentStep].title.split('\n').map(el => {
-                  return <p>{el}</p>;
-                })}</h1>
-                <div>
-                  {this.state.formData[this.state.currentStep].options ? (
-                    <div>
-                      {Object.entries(
-                        this.state.formData[this.state.currentStep].options
-                      ).map(([key, value]) => (
-                        // Enviar mensaje de rocket chat
-                        <div key={key}>
-                          <input
-                            type="radio"
-                            id={key}
-                            value={key}
-                            checked={this.state.currentStep === key}
-                            onChange={this.handleOptionChange}
-                          />
-                          <label htmlFor={key}>{value}</label>
-                        </div>
-                      ))}
+    if (!isNaN(inputAsNumber) && inputAsNumber > 0 && inputAsNumber <= optionsArray.length) {
+      const selectedOptionKey = optionsArray[inputAsNumber - 1]; // <- radio
+      const selectedOption = formData[currentStep].options[selectedOptionKey];
+      handleOptionChange(selectedOption.value, inputValue);
+    } else {
+      setMessages((prev) => [
+        ...prev,
+        {
+          agentMessage: {
+            timestamp: new Date().toISOString(),
+            text: "Por favor ingresa una de las opciones válidas.",
+          },
+        },
+      ]);
+    }
+
+    setInputValue('');
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
+  const reset = () => {
+    const firstStep = Object.keys(formData)[0];
+    setCurrentStep(firstStep);
+    setSelectionHistoryIds([firstStep]);
+    setMessages([
+      {
+        agentMessage: {
+          timestamp: new Date().toISOString(),
+          text: formData[firstStep].title,
+        },
+      },
+    ]);
+  };
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  return (
+    <Card variant="outlined" className="formBody">
+      <div className="imgBg">
+        <>
+          <div className="chatWindow">
+            {messages.map((message, index) => (
+              message.agentMessage ? (
+                message.agentMessage.text.split("\n").map((el, idx) => (
+                  el !== "" && (
+                    <div key={idx} className="agentMessage">
+                      <p dangerouslySetInnerHTML={{ __html: el }}></p>
+                      <span className='timeMessage'>{new Date(message.agentMessage.timestamp).toLocaleTimeString()}</span>
                     </div>
-                  ) : this.state.formData[this.state.currentStep].transfer ? (
-                    <>
-                      <p>
-                        -- EN ESTE PUNTO SE FINALIZA EL CHAT --  <br />
-                        <b>
-                          {this.state.formData[this.state.currentStep].transfer}
-                        </b>
-                      </p>
-                      <button
-                        onClick={() => {
-                          this.reset();
-                        }}
-                      >
-                        Reiniciar
-                      </button>
-                    </>
-                  ) : null}
+                  )
+                ))
+              ) : (message.userMessage) ? (
+                <div className="userMessage" key={index}>
+                  <p>{message.userMessage.text}</p>
+                  <span className='timeMessage'>{new Date(message.userMessage.timestamp).toLocaleTimeString()}</span>
+                </div>
+              ) : <>
+                <div className="systemMessage" key={index}>
+                  <p>{message.systemMessage.text}</p>
                 </div>
               </>
-            ) : (
-              'NO existe un formulario'
-            )}
+            ))}
+            {/* Dummy div to act as an anchor for scrolling */}
+            <div ref={chatEndRef}></div>
           </div>
-        </Card>
-      </>
-    );
-  }
-}
+
+          <div>
+            <div className='chatInpputContainer'>
+              <span className='chatInpputIcons'>
+                <span>😀</span>
+                <span>➕</span>
+              </span>
+              <input
+                className='chatInpput'
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                type="text"
+                min="1"
+                max={Object.keys(formData[currentStep]?.options || {}).length}
+              />
+              <span className='chatInpputSend' onClick={handleSubmit}>ENVIAR</span>
+            </div>
+
+          </div>
+        </>
+      </div>
+    </Card>
+  );
+};
 
 export default StepperForm;
