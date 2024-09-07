@@ -21,7 +21,7 @@ mongoose
   .catch((err) => console.log(err));
 
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('../build/'));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/flowcharts', flowchartRoutes);
