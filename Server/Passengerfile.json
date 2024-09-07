@@ -1,0 +1,14 @@
+{
+    "app_type": "node",
+    "startup_file": "app.js",
+    "environment": "production",
+    "exec_env": {
+        "NODE_ENV": "production",
+        "PORT": 4000 
+    },
+    "log_file": "logs/passenger.log",
+    "restart_dir": "tmp",
+    "restart_file": "always_restart.txt",
+    "max_pool_size": 6,
+    "min_instances": 1
+}
